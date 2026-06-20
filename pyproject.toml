@@ -1,0 +1,14 @@
+[project]
+name = "smtp-email-checker"
+version = "1.0.0"
+dependencies = [
+    "flask",
+    "gunicorn",
+    "smtplib",
+    "email-validator",
+    "dnspython"
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
