@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Email Credential Checker</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: #fafafa;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        Helvetica, Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+      color: #262626;
+    }
+
+    .wrapper {
+      display: flex;
+      align-items: flex-start;
+      gap: 32px;
+      max-width: 935px;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .phone-mockup {
+      width: 380px;
+      min-width: 380px;
+      height: 580px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .phone-mockup svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    @media (max-width: 768px) { .phone-mockup { display: none; } }
+
+    .right-col {
+      width: 350px;
+      min-width: 0;
+      flex-shrink: 0;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid #dbdbdb;
+      border-radius: 1px;
+      padding: 40px 40px 20px;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .email-logo {
+      display: inline-block;
+      margin-bottom: 28px;
+    }
+
+    .email-logo svg {
+      width: 48px;
+      height: 48px;
+      fill: #ea4335;
+    }
+
+    .field {
+      position: relative;
+      margin-bottom: 6px;
+    }
+
+    .field input {
+      width: 100%;
+      background: #fafafa;
+      border: 1px solid #dbdbdb;
+      border-radius: 3px;
+      padding: 9px 8px 7px;
+      font-size: 12px;
+      color: #262626;
+      outline: none;
+      transition: border-color 0.1s;
+      height: 38px;
+    }
+
+    .field input:focus { border-color: #a8a8a8; }
+
+    .field label {
+      position: absolute;
+      left: 9px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 12px;
+      color: #8e8e8e;
+      pointer-events: none;
+      transition: all 0.1s ease;
+      background: transparent;
+    }
+
+    .field input:focus ~ label,
+    .field input:not(:placeholder-shown) ~ label {
+      top: 7px;
+      transform: none;
+      font-size: 9px;
+      font-weight: 600;
+    }
+
+    .field input { padding-top: 14px; padding-bottom: 2px; }
+    .field input:placeholder-shown { padding-top: 9px; padding-bottom: 7px; }
+
+    .pw-wrap { position: relative; }
+    .pw-wrap input { padding-right: 56px; }
+
+    .toggle-pw {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      color: #262626;
+      padding: 0;
+      line-height: 1;
+    }
+
+    .btn-login {
+      width: 100%;
+      margin-top: 8px;
+      padding: 7px 16px;
+      border-radius: 8px;
+      border: none;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      background: #1a73e8;
+      color: #fff;
+      transition: opacity 0.15s;
+      height: 32px;
+      line-height: 1;
+    }
+
+    .btn-login:hover:not(:disabled) { opacity: 0.85; }
+    .btn-login:disabled { opacity: 0.45; cursor: default; }
+
+    .or-row {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      margin: 18px 0 18px;
+    }
+
+    .or-row::before, .or-row::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: #dbdbdb;
+    }
+
+    .or-row span {
+      font-size: 13px;
+      font-weight: 600;
+      color: #8e8e8e;
+      letter-spacing: 1px;
+    }
+
+    .forgot {
+      display: block;
+      margin-top: 14px;
+      font-size: 12px;
+      color: #262626;
+      text-decoration: none;
+    }
+
+    .forgot:hover { color: #8e8e8e; }
+
+    .signup-card {
+      background: #fff;
+      border: 1px solid #dbdbdb;
+      border-radius: 1px;
+      padding: 20px;
+      text-align: center;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    .signup-card a {
+      color: #0095f6;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .app-row {
+      text-align: center;
+      font-size: 14px;
+      margin-bottom: 12px;
+      color: #262626;
+    }
+
+    .app-badges {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 12px;
+    }
+
+    .app-badges img { height: 40px; border-radius: 6px; }
+
+    .spinner {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.65s linear infinite;
+      vertical-align: middle;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .toast {
+      display: none;
+      margin-top: 14px;
+      padding: 10px 12px;
+      border-radius: 4px;
+      font-size: 13px;
+      line-height: 1.4;
+      text-align: left;
+    }
+
+    .toast.valid   { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    .toast.warning { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+    .toast.error   { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+    .toast strong { display: block; margin-bottom: 3px; font-weight: 700; }
+
+    .acc-table {
+      margin-top: 10px;
+      width: 100%;
+      font-size: 12px;
+      border-collapse: collapse;
+    }
+
+    .acc-table td {
+      padding: 4px 0;
+      border-bottom: 1px solid rgba(0,0,0,0.07);
+    }
+
+    .acc-table td:first-child { color: #8e8e8e; width: 50%; }
+    .acc-table td:last-child  { font-weight: 600; color: #262626; }
+
+    .acc-table tr:last-child td { border-bottom: none; }
+
+    footer {
+      text-align: center;
+      font-size: 12px;
+      color: #8e8e8e;
+      margin-top: 24px;
+      max-width: 350px;
+    }
+
+    footer nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 14px; margin-bottom: 14px; }
+    footer nav a { color: #8e8e8e; text-decoration: none; }
+    footer nav a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+  <div class="wrapper">
+
+    <div class="phone-mockup">
+      <svg viewBox="0 0 380 580" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="30" y="10" width="320" height="560" rx="36" fill="#fff" stroke="#dbdbdb" stroke-width="1.5"/>
+        <rect x="130" y="22" width="120" height="18" rx="9" fill="#f0f0f0"/>
+        <rect x="44" y="50" width="292" height="490" rx="4" fill="#fafafa"/>
+        <rect x="50" y="56" width="93" height="93" rx="2" fill="#efefef"/>
+        <rect x="147" y="56" width="93" height="93" rx="2" fill="#e0e0e0"/>
+        <rect x="244" y="56" width="86" height="93" rx="2" fill="#d6d6d6"/>
+        <rect x="50" y="153" width="93" height="93" rx="2" fill="#e8e8e8"/>
+        <rect x="147" y="153" width="93" height="93" rx="2" fill="#f5f5f5"/>
+        <rect x="244" y="153" width="86" height="93" rx="2" fill="#ebebeb"/>
+        <rect x="50" y="250" width="93" height="93" rx="2" fill="#dcdcdc"/>
+        <rect x="147" y="250" width="93" height="93" rx="2" fill="#e4e4e4"/>
+        <rect x="244" y="250" width="86" height="93" rx="2" fill="#f0f0f0"/>
+        <rect x="44" y="500" width="292" height="40" rx="2" fill="#fff" stroke="#dbdbdb" stroke-width="0.5"/>
+        <rect x="155" y="556" width="70" height="8" rx="4" fill="#ccc"/>
+      </svg>
+    </div>
+
+    <div class="right-col">
+
+      <div class="card">
+
+        <div class="email-logo">
+          <svg viewBox="0 0 24 24">
+            <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+          </svg>
+        </div>
+
+        <form id="loginForm" autocomplete="off">
+          <div class="field">
+            <input type="email" id="email" placeholder=" " autocapitalize="none" autocomplete="off" />
+            <label for="email">Email address</label>
+          </div>
+
+          <div class="field pw-wrap">
+            <input type="password" id="password" placeholder=" " autocomplete="off" />
+            <label for="password">Password</label>
+            <button type="button" class="toggle-pw" id="togglePw">Show</button>
+          </div>
+
+          <button type="submit" class="btn-login" id="submitBtn" disabled>Verify</button>
+        </form>
+
+        <div class="or-row"><span>OR</span></div>
+
+        <a href="#" class="forgot">Forgot password?</a>
+
+        <div class="toast" id="toast"></div>
+      </div>
+
+      <div class="signup-card">
+        Don't have an account? <a href="#">Sign up</a>
+      </div>
+
+      <div class="app-row">
+        Get the app.
+        <div class="app-badges">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Download_on_the_App_Store_Badge.svg/320px-Download_on_the_App_Store_Badge.svg.png"
+               alt="Download on the App Store" style="height:36px;border-radius:8px" />
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Google_Play_Store_badge_EN.svg/320px-Google_Play_Store_badge_EN.svg.png"
+               alt="Get it on Google Play" style="height:36px;border-radius:8px" />
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>
+    <nav>
+      <a href="#">Meta</a><a href="#">About</a><a href="#">Blog</a>
+      <a href="#">Jobs</a><a href="#">Help</a><a href="#">API</a>
+      <a href="#">Privacy</a><a href="#">Terms</a><a href="#">Locations</a>
+      <a href="#">Email Lite</a><a href="#">Threads</a><a href="#">Contact</a>
+    </nav>
+    <span>© 2024 Email from Meta</span>
+  </footer>
+
+  <script>
+    const emailEl = document.getElementById('email');
+    const passwordEl = document.getElementById('password');
+    const submitBtn = document.getElementById('submitBtn');
+    const togglePw = document.getElementById('togglePw');
+    const toast = document.getElementById('toast');
+    const form = document.getElementById('loginForm');
+
+    function updateBtn() {
+      submitBtn.disabled = !(emailEl.value.trim() && passwordEl.value);
+    }
+    emailEl.addEventListener('input', updateBtn);
+    passwordEl.addEventListener('input', updateBtn);
+
+    togglePw.addEventListener('click', () => {
+      const isText = passwordEl.type === 'text';
+      passwordEl.type = isText ? 'password' : 'text';
+      togglePw.textContent = isText ? 'Show' : 'Hide';
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = emailEl.value.trim();
+      const password = passwordEl.value;
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="spinner"></span>';
+      toast.style.display = 'none';
+
+      try {
+        const res = await fetch('/check', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
+        const data = await res.json();
+        showToast(data);
+      } catch {
+        showToast({ success: false, message: 'Network error. Please try again.' });
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Verify';
+      }
+    });
+
+    function showToast(data) {
+      const status = data.status || '';
+      const isValid = data.success;
+
+      toast.className = 'toast ' + (isValid ? 'valid' : 'error');
+      toast.style.display = 'block';
+
+      let label = isValid ? '✓ Valid credentials' : '✕ Invalid credentials';
+      let html = `<strong>${label}</strong>${esc(data.message || '')}`;
+
+      if (data.account) {
+        const a = data.account;
+        html += `
+          <table class="acc-table">
+            <tr><td>Email</td><td>${esc(a.email || '—')}</td></tr>
+            <tr><td>Domain</td><td>${esc(a.domain || '—')}</td></tr>
+            <tr><td>Server</td><td>${esc(a.server || '—')}</td></tr>
+            <tr><td>Port</td><td>${esc(a.port || '—')}</td></tr>
+          </table>`;
+      }
+
+      toast.innerHTML = html;
+    }
+
+    function esc(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+  </script>
+</body>
+</html>
